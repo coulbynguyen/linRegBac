@@ -18,13 +18,85 @@ int comparehands(int player_total, int banker_total){
     else if(player_total < banker_total){
         return 1;
     }
-    //2 represents that a tie has occured
+    //this represents that a tie has occured and should be considered a player win since banker charges a 5% tax
     else{
-        return 2;
+        return 0;
     }
 }
 
-int playhand(int &top_of_deck, int shoe[]){
+void getcount(int card, int card_count[]){
+    if(card == 1 || card == 2  || card == 3){
+        card_count[0] += 1;
+    }
+    else if(card == 4){
+        card_count[0] += 2;
+    }
+    else if(card == 5 || card == 7 || card == 8){
+        card_count[0] -= 1;
+    }
+    else if(card == 6){
+        card_count[0] -= 2;
+    }
+
+    switch(card){
+        case 10:
+            card_count[1] += 188;
+            card_count[2] -= 178;
+            card_count[3] += 5129;
+            break;
+        case 1:
+            card_count[1] += 440;
+            card_count[2] -= 448;
+            card_count[3] += 1293;
+            break;
+        case 2:
+            card_count[1] += 522;
+            card_count[2] -= 543;
+            card_count[3] -= 2392;
+            break;
+        case 3:
+            card_count[1] += 649;
+            card_count[2] -= 672;
+            card_count[3] -= 2141;
+            break;
+        case 4:
+            card_count[1] += 1157;
+            card_count[2] -= 1195;
+            card_count[3] -= 2924;
+            break;
+        case 5:
+            card_count[1] -= 827;
+            card_count[2] += 841;
+            card_count[3] -= 2644;
+            break;
+        case 6:
+            card_count[1] -= 1132;
+            card_count[2] += 1128;
+            card_count[3] -= 11595;
+            break;
+        case 7:
+            card_count[1] -= 827;
+            card_count[2] += 817;
+            card_count[3] -= 10914;
+            break;
+        case 8:
+            card_count[1] -= 502;
+            card_count[2] += 533;
+            card_count[3] += 6543;
+            break;
+        case 9:
+            card_count[1] -= 231;
+            card_count[2] += 249;
+            card_count[3] += 4260;
+            break;
+        default:
+            break;
+
+    }
+}
+
+
+int playhand(int &top_of_deck, int shoe[], int card_count[]){
     //this value doesn't need to be initialized
     //as its value will always be set when drawn
     int third_card_value;
@@ -33,16 +105,20 @@ int playhand(int &top_of_deck, int shoe[]){
     int banker_total = 0;
     //Both players draw their first card
     player_total += shoe[top_of_deck];
+    getcount(shoe[top_of_deck], card_count);
     top_of_deck++;
 
     banker_total += shoe[top_of_deck];
+    getcount(shoe[top_of_deck], card_count);
     top_of_deck++;
 
     //Both players draw their second card
     player_total += shoe[top_of_deck];
+    getcount(shoe[top_of_deck], card_count);
     top_of_deck++;
 
     banker_total += shoe[top_of_deck+3];
+    getcount(shoe[top_of_deck], card_count);
     top_of_deck++;
 
     //in baccarat you only care abou the right digit
@@ -71,6 +147,7 @@ int playhand(int &top_of_deck, int shoe[]){
             //we simply just need to take the card off the top
             banker_total += shoe[top_of_deck];
             //and increment it for the number of cards drawn which will be 1
+            getcount(shoe[top_of_deck], card_count);
             top_of_deck += 1;
             //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
             banker_total = banker_total%10;
@@ -86,6 +163,7 @@ int playhand(int &top_of_deck, int shoe[]){
         player_total += shoe[top_of_deck];
         third_card_value = shoe[top_of_deck];
         //and increment it for the number of cards drawn which will be 1
+        getcount(shoe[top_of_deck], card_count);
         top_of_deck += 1;
         //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
         player_total = player_total%10;
@@ -106,6 +184,7 @@ int playhand(int &top_of_deck, int shoe[]){
                 //we simply just need to take the card off the top
                 banker_total += shoe[top_of_deck];
                 //and increment it for the number of cards drawn which will be 1
+                getcount(shoe[top_of_deck], card_count);
                 top_of_deck += 1;
                 //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
                 banker_total = banker_total%10;
@@ -128,6 +207,7 @@ int playhand(int &top_of_deck, int shoe[]){
                 //we simply just need to take the card off the top
                 banker_total += shoe[top_of_deck];
                 //and increment it for the number of cards drawn which will be 1
+                getcount(shoe[top_of_deck], card_count);
                 top_of_deck += 1;
                 //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
                 banker_total = banker_total%10;
@@ -150,6 +230,7 @@ int playhand(int &top_of_deck, int shoe[]){
                 //we simply just need to take the card off the top
                 banker_total += shoe[top_of_deck];
                 //and increment it for the number of cards drawn which will be 1
+                getcount(shoe[top_of_deck], card_count);
                 top_of_deck += 1;
                 //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
                 banker_total = banker_total%10;
@@ -172,6 +253,7 @@ int playhand(int &top_of_deck, int shoe[]){
                 //we simply just need to take the card off the top
                 banker_total += shoe[top_of_deck];
                 //and increment it for the number of cards drawn which will be 1
+                getcount(shoe[top_of_deck], card_count);
                 top_of_deck += 1;
                 //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
                 banker_total = banker_total%10;
@@ -191,6 +273,7 @@ int playhand(int &top_of_deck, int shoe[]){
                 //we simply just need to take the card off the top
                 banker_total += shoe[top_of_deck];
                 //and increment it for the number of cards drawn which will be 1
+                getcount(shoe[top_of_deck], card_count);
                 top_of_deck += 1;
                 //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
                 banker_total = banker_total%10;
@@ -203,13 +286,21 @@ int playhand(int &top_of_deck, int shoe[]){
 
 }
 
+int sumofarray(int *myarray, int size){
+    int total = 0;
+    for(int i = 0; i < size; i++){
+        total += myarray[i];
+    }
+    return total;
+}
+
 int main(){
     srand(time(NULL));
 
     //shoe consists of 8 decks that have been shuffled through a python script
     //
     int *shoe = new int[416];
-
+    int sixtrack[6][15] = {0};
     //the card that signifies the end of the shoe
     int red_card;
 
@@ -218,6 +309,27 @@ int main(){
 
     //Shoe is set with correct deck
     ifstream deck_file("deck_file");
+
+    ofstream train;
+    train.open("trainingdata.txt", ios::app);
+
+    ofstream testBanker;
+    testBanker.open("testingdataBanker.txt", ios::app);
+
+    ofstream testPlayer;
+    testPlayer.open("testingdataPlayer.txt", ios::app);
+
+
+    int bank5[5] = {0};
+    int bank10[10] = {0};
+    int bank20[20] = {0};
+    int bank30[30] = {0};
+
+    int streak = 0;
+
+    int card_count[10] = {0};
+
+    int last_winner = 1;
 
 
     //Get the shoe information from the deck file
@@ -233,7 +345,74 @@ int main(){
     //this while loop will play the game of baccarat
     int count = 0;
     while(top_of_deck < 416-red_card){
-        int result = playhand(top_of_deck, shoe);
+
+        //cout << "HAND NUMBER: " << count << endl;
+        //cout << "NUM TIMES BANK WON IN LAST 5:  " << sumofarray(bank5, 5) << endl;
+        //cout << "NUM TIMES BANK WON IN LAST 10: " << sumofarray(bank10, 10) << endl;
+        //cout << "NUM TIMES BANK WON IN LAST 20: " << sumofarray(bank20, 20) << endl;
+        //cout << "NUM TIMES BANK WON IN LAST 30: " << sumofarray(bank30, 30) << endl;
+        //cout << "LAST WINNER: " << last_winner << endl;
+        //cout << "CARD COUNT: " << card_count[0] << endl;
+        //cout << "STREAK: " << streak << endl;
+        int a, b, c, d, e, f, g, j, k, m;
+        float h, a2, b2, c2, d2;
+        if(count > 30){
+            //train << sumofarray(bank5, 5) << " " << sumofarray(bank10, 10) << " " << sumofarray(bank20, 20) << " " << sumofarray(bank30, 30) << " " << last_winner << " " << card_count[0] << " " << streak << " ";
+            a = sumofarray(bank5, 5);
+            a2 = (float)a/5;
+            b = sumofarray(bank10, 10);
+            b2 = (float)b/10;
+            c = sumofarray(bank20, 20);
+            c2 = (float)c/20;
+            d = sumofarray(bank30, 30);
+            d2 = (float)d/30;
+            e = last_winner;
+            f = card_count[0];
+            k = card_count[1];
+            m = card_count[2];
+            g = streak;
+            j = sumofarray(sixtrack[count%6], (count/6) + 1);
+            h = (float)j/((count/6)+1);
+        }
+
+        int result = playhand(top_of_deck, shoe, card_count);
+
+        sixtrack[count%6][count/6] = result;
+        //cout << "WINNER: " << result <<  endl;
+        if(count > 30){
+            /*
+            if(result == 0){
+                testPlayer << a << " " << a2 << " " << b << " " << b2 << " " << c << " " << c2 << " " << d << " " << d2 << " " << e << " " << f << " " << k << " " << m << " " << g << " " << h << " " << result << endl;
+            }
+            else{
+                testBanker << a << " " << a2 << " " << b << " " << b2 << " " << c << " " << c2 << " " << d << " " << d2 << " " << e << " " << f << " " << k << " " << m << " " << g << " " << h << " " << result << endl;
+            }
+            */
+            train << a << " " << a2 << " " << b << " " << b2 << " " << c << " " << c2 << " " << d << " " << d2 << " " << e << " " << f << " " << k << " " << m << " " << g << " " << h << " " << result << endl;
+        }
+
+        if(last_winner == result){
+            streak++;
+        }
+        else{
+            streak = 1;
+        }
+
+        last_winner = result;
+
+
+        if(result == 1){
+            bank5[count%5] = 1;
+            bank10[count%10] = 1;
+            bank20[count%20] = 1;
+            bank30[count%30] = 1;
+        }
+        else{
+            bank5[count%5] = 0;
+            bank10[count%10] = 0;
+            bank20[count%20] = 0;
+            bank30[count%30] = 0;
+        }
         count++;
     }
 
