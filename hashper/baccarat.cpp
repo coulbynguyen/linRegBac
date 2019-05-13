@@ -5,6 +5,8 @@
 #include <time.h>
 #include <math.h>
 #include <bits/stdc++.h>
+#include <omp.h>
+
 
 using namespace std;
 
@@ -294,19 +296,19 @@ int playhand(int &top_of_deck, int shoe[], int card_count[], int &num_player_car
         }
         //if the bankers first 2 card totals are either 0,1,2 then the banker HAS TO DRAW regardless of what the third card was
         else{
-                //since we already incremented top_of_deck before here
-                //we simply just need to take the card off the top
-                banker_total += shoe[top_of_deck];
-                banker_cards[num_banker_cards_drawn] = shoe[top_of_deck];
-                num_banker_cards_drawn++;
-                //and increment it for the number of cards drawn which will be 1
-                getcount(shoe[top_of_deck], card_count);
-                top_of_deck += 1;
-                //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
-                banker_total = banker_total%10;
-                //now the totals are tallied and there will not be a card drawn for either hands
-                //so they just need to compare hands and determine a winner
-                return comparehands(player_total, banker_total);
+            //since we already incremented top_of_deck before here
+            //we simply just need to take the card off the top
+            banker_total += shoe[top_of_deck];
+            banker_cards[num_banker_cards_drawn] = shoe[top_of_deck];
+            num_banker_cards_drawn++;
+            //and increment it for the number of cards drawn which will be 1
+            getcount(shoe[top_of_deck], card_count);
+            top_of_deck += 1;
+            //here we need to get the new total because it could have exceeded 10 and we only care about the right digit
+            banker_total = banker_total%10;
+            //now the totals are tallied and there will not be a card drawn for either hands
+            //so they just need to compare hands and determine a winner
+            return comparehands(player_total, banker_total);
 
         }
     }
@@ -316,31 +318,38 @@ int playhand(int &top_of_deck, int shoe[], int card_count[], int &num_player_car
 int sumofarray(int *myarray, int size, int type){
     int total = 0;
     for(int i = 0; i < size; i++){
-      if(myarray[i] == type){
-        total += 1;
-      }
+        if(myarray[i] == type){
+            total += 1;
+        }
     }
     return total;
 }
 
 int main(){
-    srand(time(NULL));
+    //ifstream deck_file("deck_file");
+    omp_set_num_threads(8);
+    ifstream arr_deck_file[8];
+    arr_deck_file[0].open("deck_file1");
+    arr_deck_file[1].open("deck_file2");
+    arr_deck_file[2].open("deck_file3");
+    arr_deck_file[3].open("deck_file4");
+    arr_deck_file[4].open("deck_file5");
+    arr_deck_file[5].open("deck_file6");
+    arr_deck_file[6].open("deck_file7");
+    arr_deck_file[7].open("deck_file8");
 
-    //shoe consists of 8 decks that have been shuffled through a python script
-    //
-    int *shoe = new int[416];
-    int sixtrack[6][15] = {0};
-    //the card that signifies the end of the shoe
-    int red_card;
+    //ofstream train;
+    //train.open("trainingdata.txt", ios::app);
 
-    //this will be the index of where the top of the deck is, instead of constantly shifting the array.
-    int top_of_deck;
-
-    //Shoe is set with correct deck
-    ifstream deck_file("deck_file");
-
-    ofstream train;
-    train.open("trainingdata.txt", ios::app);
+    ofstream arr_train[8];
+    arr_train[0].open("trainingdata1.txt", ios::app);
+    arr_train[1].open("trainingdata2.txt", ios::app);
+    arr_train[2].open("trainingdata3.txt", ios::app);
+    arr_train[3].open("trainingdata4.txt", ios::app);
+    arr_train[4].open("trainingdata5.txt", ios::app);
+    arr_train[5].open("trainingdata6.txt", ios::app);
+    arr_train[6].open("trainingdata7.txt", ios::app);
+    arr_train[7].open("trainingdata8.txt", ios::app);
 
     ofstream testBanker;
     testBanker.open("testingdataBanker.txt", ios::app);
@@ -350,218 +359,234 @@ int main(){
 
     ofstream testTie;
     testTie.open("testingdataTie.txt", ios::app);
+    #pragma omp parallel for default(none) shared(arr_train, arr_deck_file)
+    for(int loop = 0; loop < 8; loop++){
+        srand(time(NULL));
+
+        //shoe consists of 8 decks that have been shuffled through a python script
+        //
+        int *shoe = new int[416];
+        int sixtrack[6][15] = {0};
+        //the card that signifies the end of the shoe
+        int red_card;
+
+        //this will be the index of where the top of the deck is, instead of constantly shifting the array.
+        int top_of_deck;
+
+        //Shoe is set with correct deck
 
 
-    int bank5[5] = {0};
-    int bank10[10] = {0};
-    int bank20[20] = {0};
-    int bank30[30] = {0};
+        int bank5[5] = {0};
+        int bank10[10] = {0};
+        int bank20[20] = {0};
+        int bank30[30] = {0};
 
-    int streak = 0;
+        int streak = 0;
 
-    int card_count[10] = {0};
+        int card_count[10] = {0};
 
-    int last_winner = 1;
+        int last_winner = 1;
 
-    int num_banker_cards_drawn = 0;
-    int num_player_cards_drawn = 0;
-    int banker_cards[3];
-    int player_cards[3];
-
-
-    //Get the shoe information from the deck file
-    for(int i = 0; i < 416; i++){
-        deck_file >> shoe[i];
-    }
-
-    //Randomize when the red card will occur it should occur around one deck from the end of the game
-    red_card = rand()%52+52;
-
-    //The way casinos work is that they reveal the very first card and burn that many cards AND the card drawn
-    top_of_deck = shoe[0] + 1;
-    //this while loop will play the game of baccarat
-    int count = 0;
-    while(top_of_deck < 416-red_card){
-
-        //cout << "HAND NUMBER: " << count << endl;
-        //cout << "NUM TIMES BANK WON IN LAST 5:  " << sumofarray(bank5, 5) << endl;
-        //cout << "NUM TIMES BANK WON IN LAST 10: " << sumofarray(bank10, 10) << endl;
-        //cout << "NUM TIMES BANK WON IN LAST 20: " << sumofarray(bank20, 20) << endl;
-        //cout << "NUM TIMES BANK WON IN LAST 30: " << sumofarray(bank30, 30) << endl;
-        //cout << "LAST WINNER: " << last_winner << endl;
-        //cout << "STREAK: " << streak << endl;
-        int a, b, c, d, e, f, g, j, k, m, n, p;
-        int q[3];
-        int r[3];
-        int h, a2, b2, c2, d2;
-        int a3, b3, c3, d3, h2;
-        if(count > 30){
-            a = sumofarray(bank5, 5, 0); //total amount of player wins in the last 5
-            a2 = sumofarray(bank5, 5, 1); // total amount of banker wins in the last 5
-            a3 = sumofarray(bank5, 5, 2);//total amount of tie wins in the last 5
-
-            b = sumofarray(bank10, 10, 0); // player in the last 10
-            b2 = sumofarray(bank10, 10, 1);//banker in the last 10
-            b3 = sumofarray(bank10, 10, 2);//tie in the last 10
-
-            c = sumofarray(bank20, 20, 0);//player in the last 20
-            c2 = sumofarray(bank20, 20, 1);//banker in the last 20
-            c3 = sumofarray(bank20, 20, 2);//tie in the last 20
-
-            d = sumofarray(bank30, 30, 0);//player in the last 30
-            d2 = sumofarray(bank30, 30, 1);//banker in the last 30
-            d3 = sumofarray(bank30, 30, 2);//tie in the last 30
-            e = last_winner;
-            f = streak;
+        int num_banker_cards_drawn = 0;
+        int num_player_cards_drawn = 0;
+        int banker_cards[3];
+        int player_cards[3];
 
 
-            for(int i = 0; i < 3; i++){
-              q[i] = player_cards[i];
-              player_cards[i] = -1;
-            }
-            //sort q
-            int arr_n = sizeof(q)/sizeof(q[0]);
-            sort(q, q+arr_n, greater<int>());
-
-
-            for(int i = 0; i < 3; i++){
-              r[i] = banker_cards[i];
-              banker_cards[i] = -1;
-            }
-            //sort r
-            arr_n = sizeof(r)/sizeof(r[0]);
-            sort(r, r+arr_n, greater<int>());
-
+        //Get the shoe information from the deck file
+        for(int i = 0; i < 416; i++){
+            arr_deck_file[loop] >> shoe[i];
         }
 
-        int result = playhand(top_of_deck, shoe, card_count, num_player_cards_drawn, num_banker_cards_drawn, player_cards, banker_cards);
+        //Randomize when the red card will occur it should occur around one deck from the end of the game
+        red_card = rand()%52+52;
 
-        sixtrack[count%6][count/6] = result;
-        //cout << "WINNER: " << result <<  endl;
-        if(count > 30){
-/*
-            if(result == 0){
-            testPlayer << a << " "
-                    << a2 << " "
-                    << a3 << " "
-                    << b << " "
-                    << b2 << " "
-                    << b3 << " "
-                    << c << " "
-                    << c2 << " "
-                    << c3 << " "
-                    << d << " "
-                    << d2 << " "
-                    << d3 << " "
-                    << e << " "
-                    << f << " ";
+        //The way casinos work is that they reveal the very first card and burn that many cards AND the card drawn
+        top_of_deck = shoe[0] + 1;
+        //this while loop will play the game of baccarat
+        int count = 0;
+        while(top_of_deck < 416-red_card){
 
-                    for(int i = 0; i < 3; i++){
-                      testPlayer << q[i] << " ";
-                    }
+            //cout << "HAND NUMBER: " << count << endl;
+            //cout << "NUM TIMES BANK WON IN LAST 5:  " << sumofarray(bank5, 5) << endl;
+            //cout << "NUM TIMES BANK WON IN LAST 10: " << sumofarray(bank10, 10) << endl;
+            //cout << "NUM TIMES BANK WON IN LAST 20: " << sumofarray(bank20, 20) << endl;
+            //cout << "NUM TIMES BANK WON IN LAST 30: " << sumofarray(bank30, 30) << endl;
+            //cout << "LAST WINNER: " << last_winner << endl;
+            //cout << "STREAK: " << streak << endl;
+            int a, b, c, d, e, f, g, j, k, m, n, p;
+            int q[3];
+            int r[3];
+            int h, a2, b2, c2, d2;
+            int a3, b3, c3, d3, h2;
+            if(count > 30){
+                a = sumofarray(bank5, 5, 0); //total amount of player wins in the last 5
+                a2 = sumofarray(bank5, 5, 1); // total amount of banker wins in the last 5
+                //a3 = sumofarray(bank5, 5, 2);//total amount of tie wins in the last 5
 
-                    for(int i = 0; i < 3; i++){
-                      testPlayer << r[i] << " ";
-                    }
+                b = sumofarray(bank10, 10, 0); // player in the last 10
+                b2 = sumofarray(bank10, 10, 1);//banker in the last 10
+                //b3 = sumofarray(bank10, 10, 2);//tie in the last 10
 
-                    testPlayer << result << endl;
+                c = sumofarray(bank20, 20, 0);//player in the last 20
+                c2 = sumofarray(bank20, 20, 1);//banker in the last 20
+                //c3 = sumofarray(bank20, 20, 2);//tie in the last 20
+
+                d = sumofarray(bank30, 30, 0);//player in the last 30
+                d2 = sumofarray(bank30, 30, 1);//banker in the last 30
+                //d3 = sumofarray(bank30, 30, 2);//tie in the last 30
+                //e = last_winner;
+                f = streak;
+
+
+                for(int i = 0; i < 3; i++){
+                    q[i] = player_cards[i];
+                    player_cards[i] = -1;
+                }
+                //sort q
+                int arr_n = sizeof(q)/sizeof(q[0]);
+                sort(q, q+arr_n, greater<int>());
+
+
+                for(int i = 0; i < 3; i++){
+                    r[i] = banker_cards[i];
+                    banker_cards[i] = -1;
+                }
+                //sort r
+                arr_n = sizeof(r)/sizeof(r[0]);
+                sort(r, r+arr_n, greater<int>());
+
             }
-            else if(result == 1){
-            testBanker << a << " "
-                    << a2 << " "
-                    << a3 << " "
-                    << b << " "
-                    << b2 << " "
-                    << b3 << " "
-                    << c << " "
-                    << c2 << " "
-                    << c3 << " "
-                    << d << " "
-                    << d2 << " "
-                    << d3 << " "
-                    << e << " "
-                    << f << " ";
 
-                    for(int i = 0; i < 3; i++){
-                      testBanker << q[i] << " ";
-                    }
+            int result = playhand(top_of_deck, shoe, card_count, num_player_cards_drawn, num_banker_cards_drawn, player_cards, banker_cards);
 
-                    for(int i = 0; i < 3; i++){
-                      testBanker << r[i] << " ";
-                    }
+            sixtrack[count%6][count/6] = result;
+            //cout << "WINNER: " << result <<  endl;
+            if(count > 30){
+                /*
+                   if(result == 0){
+                   testPlayer << a << " "
+                   << a2 << " "
+                   << a3 << " "
+                   << b << " "
+                   << b2 << " "
+                   << b3 << " "
+                   << c << " "
+                   << c2 << " "
+                   << c3 << " "
+                   << d << " "
+                   << d2 << " "
+                   << d3 << " "
+                   << e << " "
+                   << f << " ";
 
-                    testBanker << result << endl;
+                   for(int i = 0; i < 3; i++){
+                   testPlayer << q[i] << " ";
+                   }
+
+                   for(int i = 0; i < 3; i++){
+                   testPlayer << r[i] << " ";
+                   }
+
+                   testPlayer << result << endl;
+                   }
+                   else if(result == 1){
+                   testBanker << a << " "
+                   << a2 << " "
+                   << a3 << " "
+                   << b << " "
+                   << b2 << " "
+                   << b3 << " "
+                   << c << " "
+                   << c2 << " "
+                   << c3 << " "
+                   << d << " "
+                   << d2 << " "
+                   << d3 << " "
+                   << e << " "
+                   << f << " ";
+
+                   for(int i = 0; i < 3; i++){
+                   testBanker << q[i] << " ";
+                   }
+
+                   for(int i = 0; i < 3; i++){
+                   testBanker << r[i] << " ";
+                   }
+
+                   testBanker << result << endl;
+                   }
+                   else{
+                   testTie << a << " "
+                   << a2 << " "
+                   << a3 << " "
+                   << b << " "
+                   << b2 << " "
+                   << b3 << " "
+                   << c << " "
+                   << c2 << " "
+                   << c3 << " "
+                   << d << " "
+                   << d2 << " "
+                   << d3 << " "
+                   << e << " "
+                   << f << " ";
+
+                   for(int i = 0; i < 3; i++){
+                   testTie << q[i] << " ";
+            }
+
+            for(int i = 0; i < 3; i++){
+                testTie << r[i] << " ";
+            }
+
+            testTie << result << endl;
+            }
+            */
+
+                arr_train[loop] << a << " "
+                << a2 << " "
+//                << a3 << " "
+                << b << " "
+                << b2 << " "
+  //              << b3 << " "
+                << c << " "
+                << c2 << " "
+    //            << c3 << " "
+                << d << " "
+                << d2 << " "
+      //          << d3 << " "
+        //        << e << " "
+                << f << " ";
+
+            for(int i = 0; i < 3; i++){
+                arr_train[loop] << q[i] << " ";
+            }
+
+            for(int i = 0; i < 3; i++){
+                arr_train[loop] << r[i] << " ";
+            }
+
+            arr_train[loop] << result << endl;
+
+            }
+
+            //ties break streaks
+            if(last_winner == result){
+                streak++;
             }
             else{
-            testTie << a << " "
-                    << a2 << " "
-                    << a3 << " "
-                    << b << " "
-                    << b2 << " "
-                    << b3 << " "
-                    << c << " "
-                    << c2 << " "
-                    << c3 << " "
-                    << d << " "
-                    << d2 << " "
-                    << d3 << " "
-                    << e << " "
-                    << f << " ";
-
-                    for(int i = 0; i < 3; i++){
-                      testTie << q[i] << " ";
-                    }
-
-                    for(int i = 0; i < 3; i++){
-                      testTie << r[i] << " ";
-                    }
-
-                    testTie << result << endl;
+                streak = 1;
             }
-*/
 
-            train << a << " "
-                    << a2 << " "
-                    << a3 << " "
-                    << b << " "
-                    << b2 << " "
-                    << b3 << " "
-                    << c << " "
-                    << c2 << " "
-                    << c3 << " "
-                    << d << " "
-                    << d2 << " "
-                    << d3 << " "
-                    << e << " "
-                    << f << " ";
+            last_winner = result;
 
-                    for(int i = 0; i < 3; i++){
-                      train << q[i] << " ";
-                    }
-
-                    for(int i = 0; i < 3; i++){
-                      train << r[i] << " ";
-                    }
-
-                    train << result << endl;
-
+            bank5[count%5] = result;
+            bank10[count%10] = result;
+            bank20[count%20] = result;
+            bank30[count%30] = result;
+            count++;
         }
-
-        //ties break streaks
-        if(last_winner == result){
-            streak++;
-        }
-        else{
-            streak = 1;
-        }
-
-        last_winner = result;
-
-        bank5[count%5] = result;
-        bank10[count%10] = result;
-        bank20[count%20] = result;
-        bank30[count%30] = result;
-        count++;
     }
 
 

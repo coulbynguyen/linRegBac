@@ -1,6 +1,13 @@
 import numpy as np
-
-trainingfile = open("trainingdata.txt", "r")
+import time
+trainingfile1 = open("trainingdata1.txt", "r")
+trainingfile2 = open("trainingdata2.txt", "r")
+trainingfile3 = open("trainingdata3.txt", "r")
+trainingfile4 = open("trainingdata4.txt", "r")
+trainingfile5 = open("trainingdata5.txt", "r")
+trainingfile6 = open("trainingdata6.txt", "r")
+trainingfile7 = open("trainingdata7.txt", "r")
+trainingfile8 = open("trainingdata8.txt", "r")
 
 testingBanker = open("testingdataBanker.txt", "r")
 
@@ -31,7 +38,170 @@ predict = 0
 correct = 0
 total = 0
 
-for x in trainingfile:
+start = time.time()
+
+for x in trainingfile1:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile2:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile3:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile4:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile5:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile6:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile7:
+    myarray = list(map(float, x.split()))
+    label = myarray.pop()
+
+    trainingdata.append(myarray)
+    trainingdataLabels.append(label)
+
+    if label == 0:
+        try:
+            probs0[repr(myarray)] += 1
+        except KeyError:
+            probs0[repr(myarray)] = 1
+    elif label == 1:
+        try:
+            probs1[repr(myarray)] += 1
+        except KeyError:
+            probs1[repr(myarray)] = 1
+    elif label == 2:
+        try:
+            probs2[repr(myarray)] += 1
+        except KeyError:
+            probs2[repr(myarray)] = 1
+
+for x in trainingfile8:
     myarray = list(map(float, x.split()))
     label = myarray.pop()
 
@@ -98,9 +268,12 @@ perc = float(correct)/float(total)
 print("Correct: " + str(correct) + " Total: " + str(total))
 print("Percentage " + str(perc))
 
+end = time.time()
+print(end - start)
 
 correct = 0
 total = 0
+exit()
 for x in testingBanker:
     myarray = list(map(float, x.split()))
     label = myarray.pop()
